@@ -14,9 +14,6 @@ h5 {
 .half-width {
 	width: 50%;
 }
-.btn-default, .btn-default:hover {
-	color: #2196f3;
-}
 .list-group-item.disabled, .list-group-item.disabled:hover {
 	color: black;
 }

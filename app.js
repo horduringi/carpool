@@ -1,7 +1,7 @@
 var drivers = {};
 var passengers = {};
-var from = "Anywhere";
-var to = "Anywhere";
+var from = "Anywhere...";
+var to = "Anywhere...";
 
 var emptyList = function() {
 	var list = $('.list-group');
@@ -16,7 +16,11 @@ var getUniqueValues = function(arr, key) {
 }
 
 var isFrom = function(element) {
-	return element.from == from || from == "Anywhere";
+	return element.from == from || from == "Anywhere...";
+}
+
+var isTo = function(element) {
+	return element.to == to || to == "Anywhere...";
 }
 
 var displayArray = function(arr) {
@@ -30,15 +34,35 @@ var displayArray = function(arr) {
 		}
 		list.append("<a href=\"" + arr[i]["link"] + "\" class=\"list-group-item\"><span>" + arr[i].from + " - " + arr[i].to + "</span><span class=\"pull-right\">" + arr[i]["time"] + "</span></a>")		
 	}
+	if(list.children().length == 0) {
+		list.append("<a class=\"list-group-item disabled\">" + emptyText() + "</a>");
+	}
 }
 
-var populateLocationSelects() {
+var emptyText = function() {
+	if($('#rides-button').hasClass('btn-primary'))
+	{
+		return 'Nobody offering a ride.';
+	}
+	else
+	{
+		return 'No passengers looking for a ride.';
+	}
+}
+
+var populateLocationSelects = function() {
 	var fromLocations = getUniqueValues(drivers.concat(passengers), "from");
 	var toLocations = getUniqueValues(drivers.concat(passengers), "to");
-	populateLocationSelect('#')
+	// locations contains all locations to and from whether you are a passenger or a driver
+	var locations = fromLocations.concat(toLocations).filter(function(elem, index, self) {
+		return index == self.indexOf(elem);
+	}).sort()
+	
+	populateLocationSelect('#selectFromLocation', locations);
+	populateLocationSelect('#selectToLocation', locations);
 }
 
-var populateLocationSelect(selectId, locations) {
+var populateLocationSelect = function(selectId, locations) {
 	var selectLocationObj = $(selectId);
 	selectLocationObj.empty();
 	selectLocationObj.append('<option selected>Anywhere...</option>');
@@ -49,22 +73,12 @@ var populateLocationSelect(selectId, locations) {
 
 var displayDrivers = function() {
 	$("#list-heading").text("Kind people offering a ride")
-	displayArray(drivers);
-	
-
-	//fromLocations = getUniqueValues(drivers, "from");
-	
-	//selectFromLocation = $('#selectFromLocation');
-	//selectFromLocation.empty();
-	//selectFromLocation.append('<option selected>Anywhere...</option>');
-	//for(var i in fromLocations) {
-	//	selectFromLocation.append('<option>' + fromLocations[i] + '</option>')
-	//}
+	displayArray(drivers.filter(isFrom).filter(isTo));
 }
 
 var displayPassengers = function() {
 	$("#list-heading").text("Fun people who need a ride")
-	displayArray(passengers);
+	displayArray(passengers.filter(isFrom).filter(isTo));
 }
 
 var toggleBtnClass = function(button) {
@@ -84,8 +98,7 @@ var toggleBtnClasses = function() {
 }
 
 $(document).ready(function() {
-	
-	$.ajax({
+	asyncDrivers = $.ajax({
 		url: "http://apis.is/rides/samferda-drivers",
 		dataType: "json",
 		type: "GET",
@@ -99,7 +112,7 @@ $(document).ready(function() {
 		
 	});
 
-	$.ajax({
+	asyncPassengers = $.ajax({
 		url: "http://apis.is/rides/samferda-passengers",
 		dataType: "json",
 		type: "GET",
@@ -112,13 +125,40 @@ $(document).ready(function() {
 		
 	});
 
-	$('#rides-button').on('click', function(){
-		displayDrivers();
-		toggleBtnClasses();
-	})
-	$('#passengers-button').on('click', function(){
-		displayPassengers();
-		toggleBtnClasses();
+	$.when(asyncDrivers, asyncPassengers).done(function(){
+		populateLocationSelects();
 	})
 
+	$('#rides-button').on('click', function(){
+		toggleBtnClasses();
+		displayDrivers();
+	})
+	$('#passengers-button').on('click', function(){
+		toggleBtnClasses();
+		displayPassengers();
+	})
+
+	$('select#selectFromLocation').change( function() {
+	    from = $(this).val();
+	    if($('#rides-button').hasClass('btn-primary'))
+	    {
+	    	displayDrivers();
+	    }
+	    else
+	    {
+	    	displayPassengers();
+	    }
+	});
+
+	$('select#selectToLocation').change( function() {
+	    to = $(this).val();
+	    if($('#rides-button').hasClass('btn-primary'))
+	    {
+	    	displayDrivers();
+	    }
+	    else
+	    {
+	    	displayPassengers();
+	    }
+	});
 })
