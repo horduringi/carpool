@@ -1,0 +1,25 @@
+h1, h3, h5 {
+	text-align: center;
+}
+h1 {
+	margin-bottom: 0;
+}
+h3 {
+	margin-top: 0;
+	font-style: italic;
+}
+h5 {
+	margin-top: 2em;
+}
+.half-width {
+	width: 50%;
+}
+.btn-default, .btn-default:hover {
+	color: #2196f3;
+}
+.list-group-item.disabled, .list-group-item.disabled:hover {
+	color: black;
+}
+.list-group-item {
+	color: #2196f3;
+}
