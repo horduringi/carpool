@@ -130,12 +130,18 @@ $(document).ready(function() {
 	})
 
 	$('#rides-button').on('click', function(){
-		toggleBtnClasses();
-		displayDrivers();
+		if($(this).hasClass('btn-default'))
+		{
+			toggleBtnClasses();
+			displayDrivers();
+		}
 	})
 	$('#passengers-button').on('click', function(){
-		toggleBtnClasses();
-		displayPassengers();
+		if($(this).hasClass('btn-default'))
+		{
+			toggleBtnClasses();
+			displayPassengers();	
+		}
 	})
 
 	$('select#selectFromLocation').change( function() {
